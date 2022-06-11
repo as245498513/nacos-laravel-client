@@ -1,0 +1,51 @@
+{
+  "name": "maplesnow/nacos-laravel-client",
+  "description": "阿里巴巴nacos配置中心Laravel客户端",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "mapleSnow",
+      "email": "summerweiace@163.com"
+    }
+  ],
+  "require": {
+    "guzzlehttp/guzzle": "^6.3",
+    "monolog/monolog": "^1.24|^2.0",
+    "ext-json": "*",
+    "ext-protobuf": "*",
+    "google/protobuf": "^3.17",
+    "illuminate/console": "^5.7",
+    "illuminate/support": "^5.7"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^7.5|^8.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "alibaba\\": "src/alibaba/",
+      "MapleSnow\\LaraNacos\\": "src/laravel",
+      "MapleSnow\\LoadBalance\\": "src/ribbon"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "tests\\": "tests/"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "MapleSnow\\LaraNacos\\Providers\\ServiceProvider"
+      ]
+    }
+  },
+  "config": {
+    "optimize-autoloader": true,
+    "preferred-install": "dist",
+    "sort-packages": true,
+    "secure-http":false
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true
+}
