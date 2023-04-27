@@ -19,7 +19,7 @@ class NacosRefreshConfig extends Command
      *
      * @var string
      */
-    protected $signature = 'nacos:refresh {--type=}';
+    protected $signature = 'nacos:refresh {--type=} {--listen-common}';
 
     /**
      * The console command description.
@@ -46,15 +46,16 @@ class NacosRefreshConfig extends Command
     /**
      * @throws Exception
      */
-    public function handle()
-    {
+    public function handle() {
 
         $type = $this->option("type");
+        // 是否监听公共配置/语言包
+        $hasListenCommon = $this->option("listen-common");
 
-        if($type){
-            $dataId = getenv("LARAVEL_NACOS_DATAID"). "_". $type;
-            $this->configFilePath = call_user_func([NacosConfig::class, "get".ucfirst($type)."Path"]);
-        }else{
+        if ($type) {
+            $dataId = getenv("LARAVEL_NACOS_DATAID") . "_" . $type;
+            $this->configFilePath = call_user_func([NacosConfig::class, "get" . ucfirst($type) . "Path"]);
+        } else {
             $this->configFilePath = NacosConfig::getDefaultPath();
             $dataId = getenv("LARAVEL_NACOS_DATAID");
         }
@@ -69,17 +70,34 @@ class NacosRefreshConfig extends Command
 
         $nacos = (new Nacos(
             "${host}:${port}",
-            $dataId,
+            $hasListenCommon ? static::PHP_COMMON_PREFIX . $type : $dataId,
             $groupId,
             $tenant
         ));
 
-        if($isWatch){
-            ListenerConfigSuccessListener::add(function(string $config) use($nacos, $type,$dataId, $groupId, $tenant){
-                $commonConfig = $this->getCommonConfig($nacos, $type);
+        if ($isWatch) {
+            ListenerConfigSuccessListener::add(function (?string $config) use ($nacos, $type, $dataId, $groupId, $tenant, $hasListenCommon) {
 
-                // 更新配置
-                $configList = $config . "\n" . $commonConfig ;
+                if ($hasListenCommon) {
+                    $serviceConfig = $this->getServiceConfig($nacos, $dataId);
+
+                    // 更新配置
+                    if ($config) {
+                        $configList = $serviceConfig . "\n" . $config;
+                    } else {
+                        $configList = $config;
+                    }
+                } else {
+                    $commonConfig = $this->getCommonConfig($nacos, $type);
+
+                    // 更新配置
+                    if ($config) {
+                        $configList = $config . "\n" . $commonConfig;
+                    } else {
+                        $configList = $commonConfig;
+                    }
+                }
+
                 $this->updateConfig($configList);
 
                 // 保存快照
@@ -101,7 +119,7 @@ class NacosRefreshConfig extends Command
     /**
      * 获取公共配置
      * @param Nacos $nacos
-     * @param string $type
+     * @param string|null $type
      * @return string|null
      */
     private function getCommonConfig(Nacos $nacos,?string $type): ?string {
@@ -121,13 +139,29 @@ class NacosRefreshConfig extends Command
     }
 
     /**
+     * 获取公共配置
+     * @param Nacos $nacos
+     * @param string $dataId
+     * @return string|null
+     */
+    private function getServiceConfig(Nacos $nacos, string $dataId): ?string {
+
+        $commonDataId = $nacos->getDataId();
+        $nacos->setDataId($dataId);
+        $config = $nacos->runOnce();
+
+        $nacos->setDataId($commonDataId);
+        return $config;
+    }
+
+    /**
      * 更新配置
      * @param string $configList
      * @throws Exception
      */
     private function updateConfig(string $configList) {
         // validate
-        if(empty($configList)){
+        if (empty($configList)) {
             throw new Exception("config from nacos is empty");
         }
         file_put_contents($this->configFilePath, $configList);

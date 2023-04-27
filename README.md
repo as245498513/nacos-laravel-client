@@ -77,9 +77,9 @@ LARAVEL_NACOS_TENANT=85dece02-efa2-4817-997e-6ceeb048dd3b
 2. 运行脚本监听配置
 
    ```bash
-   # 监听nacos配置变化
+   # 监听nacos服务配置变化
    php artisan nacos:refresh --type=config
-   # 监听nacos语言包变化
+   # 监听nacos服务语言包变化
    php artisan nacos:refresh --type=lang
    ```
 
@@ -92,14 +92,24 @@ LARAVEL_NACOS_TENANT=85dece02-efa2-4817-997e-6ceeb048dd3b
 
    默认使用`php-common_`作为前缀,可通过系统环境变量`LARAVEL_NACOS_PHP_COMMON_PREFIX`自定义前缀
 
-   ​	![](docs/img/3.png)
+   ​    ![](docs/img/3.png)
 
 2. 去除原nacos中写入公共基础配置（若项目中有和公共配置相同的Key值，项目中优先级更高，既可以重写公共配置项）
 3. 执行`同时管理语言包和配置`步骤1和步骤2
 
+运行脚本监听配置
+
+```bash
+# 监听nacos公共配置变化
+php artisan nacos:refresh --listen-comnon --type=config
+# 监听nacos公共语言包变化
+php artisan nacos:refresh --listen-common --type=lang
+```
 
 ### 配置兜底
+
 业务服务的配置通过有3种途径，可以尽最大可能保证项目正常启动和运行。
+
 1. 第一优先级：从nacos配置中心获取
 2. 第二优先级：从本地配置快照获取
 3. 第三优先级：从本地默认配置获取
