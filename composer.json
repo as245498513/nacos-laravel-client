@@ -24,8 +24,8 @@
   "autoload": {
     "psr-4": {
       "alibaba\\": "src/alibaba/",
-      "Meckel\\LaraNacos\\": "src/laravel",
-      "Meckel\\LoadBalance\\": "src/ribbon"
+      "Maplesnow\\LaraNacos\\": "src/laravel",
+      "Maplesnow\\LoadBalance\\": "src/ribbon"
     }
   },
   "autoload-dev": {
@@ -36,7 +36,7 @@
   "extra": {
     "laravel": {
       "providers": [
-        "Meckel\\LaraNacos\\Providers\\ServiceProvider"
+        "Maplesnow\\LaraNacos\\Providers\\ServiceProvider"
       ]
     }
   },
